@@ -1,0 +1,55 @@
+#include<stdio.h>
+#include <stdint.h>
+#include "main.h"
+//#if !defined(__SOFT_FP__) && defined(__ARM_FP)
+//  #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
+//#endif
+
+int main(void)
+{
+
+
+	uint32_t *pClk_ctrl_reg    =(uint32_t*)0x40023830;//Address of the Clock control register(AHB1ENR)
+	                                                  //0x40023800+0x30 ====> 0x40023830
+
+
+
+	uint32_t *pPortA_mode_reg  =(uint32_t*)0x40020000;//Address of the GPIOA mode register (used to cotrol mode)
+	                                                  //0x40020000+0x00 =====> 0x40020000
+
+
+
+
+	uint32_t *pPortA_out_data_reg   =(uint32_t*)0x40020014;//Address of GPIOA output data register (used to write)
+	                                                       //40020000+0x14   ======> 0x40020014
+
+
+	//enble the clock for GPIOA periperal in the AHB1 ENB
+	uint32_t temp=*pClk_ctrl_reg; // Read operation
+
+	 temp |=(1<<0);//modefy
+	*pClk_ctrl_reg = temp;//write back
+
+	//or *pClk_ctrl_reg | = 0x01;
+	//2. configur the mode of the IO pin as output
+	//a.clear the 12th and 11th bit position (clear)
+
+	*pPortA_mode_reg = *pPortA_mode_reg & ~(3<<10);
+
+	//b. set the 10th bit position(set)
+
+	*pPortA_mode_reg = *pPortA_mode_reg | (1<<10);
+	 /* Loop forever */
+     while(1)
+    {
+	//3.set 5th bit of the output register
+	*pPortA_out_data_reg  = *pPortA_out_data_reg | (1<<5);
+
+
+	//for(uint32_t i=0;i<2000000;i++);
+
+	*pPortA_out_data_reg  = *pPortA_out_data_reg & ~(1<<5);
+
+	//for(uint32_t i=0;i<2000000;i++);
+    }
+}
